@@ -92,3 +92,16 @@ COPY init.sh /data
 
 CMD ["/usr/sbin/sshd", "-D"]
 ```
+
+```sh
+mkdir -p /data/mysql-server-8.2.0/build /data/mysql-server-8.2.0/data
+chown -R mysql.mysql /data/mysql-server-8.2.0/data
+
+cmake --no-warn-unused-cli -DWITH_BOOST=/data/boost_1_77_0 -DWITH_DEBUG=1 -DBUILD_CONFIG=mysql_release -DWITH_RTTI=ON -DWITH_SHOW_PARSE_TREE=ON -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S/data/mysql-server-8.2.0 -B/data/mysql-server-8.2.0/build -G "Unix Makefiles"
+
+cmake --build /data/mysql-server-8.2.0/build --config Debug --target component_reference_cache -j 32
+cmake --build /data/mysql-server-8.2.0/build --config Debug --target mysqld -j 32
+cmake --build /data/mysql-server-8.2.0/build --config Debug --target mysql -j 32
+
+/data/mysql-server-8.2.0/build/runtime_output_directory/mysqld-debug --initialize --user=mysql --basedir=/data/mysql-server-8.2.0/build --datadir=/data/mysql-server-8.2.0/data
+```
